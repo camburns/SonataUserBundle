@@ -21,9 +21,9 @@ class GroupAdmin extends AbstractAdmin
     /**
      * {@inheritdoc}
      */
-    protected $formOptions = array(
+    protected $formOptions = [
         'validation_groups' => 'Registration',
-    );
+    ];
 
     /**
      * {@inheritdoc}
@@ -32,7 +32,7 @@ class GroupAdmin extends AbstractAdmin
     {
         $class = $this->getClass();
 
-        return new $class('', array());
+        return new $class('', []);
     }
 
     /**
@@ -42,8 +42,7 @@ class GroupAdmin extends AbstractAdmin
     {
         $listMapper
             ->addIdentifier('name')
-            ->add('roles')
-        ;
+            ->add('roles');
     }
 
     /**
@@ -52,8 +51,7 @@ class GroupAdmin extends AbstractAdmin
     protected function configureDatagridFilters(DatagridMapper $datagridMapper)
     {
         $datagridMapper
-            ->add('name')
-        ;
+            ->add('name');
     }
 
     /**
@@ -63,17 +61,17 @@ class GroupAdmin extends AbstractAdmin
     {
         $formMapper
             ->tab('Group')
-                ->with('General', array('class' => 'col-md-6'))
+                ->with('General', ['class' => 'col-md-6'])
                     ->add('name')
                 ->end()
             ->end()
             ->tab('Security')
-                ->with('Roles', array('class' => 'col-md-12'))
-                    ->add('roles', 'sonata_security_roles', array(
+                ->with('Roles', ['class' => 'col-md-12'])
+                    ->add('roles', 'sonata_security_roles', [
                         'expanded' => true,
                         'multiple' => true,
                         'required' => false,
-                    ))
+                    ])
                 ->end()
             ->end()
         ;
