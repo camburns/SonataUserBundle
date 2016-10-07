@@ -33,7 +33,7 @@ class ProfileMenuBuilderTest extends \PHPUnit_Framework_TestCase
         $translator = $this->getMock('Symfony\Component\Translation\TranslatorInterface');
         $eventDispatcher = $this->getMock('Symfony\Component\EventDispatcher\EventDispatcherInterface');
 
-        $builder = new ProfileMenuBuilder($factory, $translator, array(), $eventDispatcher);
+        $builder = new ProfileMenuBuilder($factory, $translator, [], $eventDispatcher);
 
         $genMenu = $builder->createProfileMenu();
 

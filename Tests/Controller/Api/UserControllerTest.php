@@ -26,13 +26,13 @@ class UserControllerTest extends \PHPUnit_Framework_TestCase
     {
         $user = $this->getMock('Sonata\UserBundle\Model\UserInterface');
         $userManager = $this->getMock('Sonata\UserBundle\Model\UserManagerInterface');
-        $userManager->expects($this->once())->method('getPager')->will($this->returnValue(array()));
+        $userManager->expects($this->once())->method('getPager')->will($this->returnValue([]));
 
         $paramFetcher = $this->getMock('FOS\RestBundle\Request\ParamFetcherInterface');
         $paramFetcher->expects($this->exactly(3))->method('get');
-        $paramFetcher->expects($this->once())->method('all')->will($this->returnValue(array()));
+        $paramFetcher->expects($this->once())->method('all')->will($this->returnValue([]));
 
-        $this->assertEquals(array(), $this->createUserController(null, $userManager)->getUsersAction($paramFetcher));
+        $this->assertEquals([], $this->createUserController(null, $userManager)->getUsersAction($paramFetcher));
     }
 
     public function testGetUserAction()
@@ -58,7 +58,7 @@ class UserControllerTest extends \PHPUnit_Framework_TestCase
         $userManager->expects($this->once())->method('updateUser')->will($this->returnValue($user));
 
         $form = $this->getMockBuilder('Symfony\Component\Form\Form')->disableOriginalConstructor()->getMock();
-        $form->expects($this->once())->method('submit');
+        $form->expects($this->once())->method('handleRequest');
         $form->expects($this->once())->method('isValid')->will($this->returnValue(true));
         $form->expects($this->once())->method('getData')->will($this->returnValue($user));
 
@@ -75,7 +75,7 @@ class UserControllerTest extends \PHPUnit_Framework_TestCase
         $userManager = $this->getMock('Sonata\UserBundle\Model\UserManagerInterface');
 
         $form = $this->getMockBuilder('Symfony\Component\Form\Form')->disableOriginalConstructor()->getMock();
-        $form->expects($this->once())->method('submit');
+        $form->expects($this->once())->method('handleRequest');
         $form->expects($this->once())->method('isValid')->will($this->returnValue(false));
 
         $formFactory = $this->getMock('Symfony\Component\Form\FormFactoryInterface');
@@ -95,7 +95,7 @@ class UserControllerTest extends \PHPUnit_Framework_TestCase
         $userManager->expects($this->once())->method('updateUser')->will($this->returnValue($user));
 
         $form = $this->getMockBuilder('Symfony\Component\Form\Form')->disableOriginalConstructor()->getMock();
-        $form->expects($this->once())->method('submit');
+        $form->expects($this->once())->method('handleRequest');
         $form->expects($this->once())->method('isValid')->will($this->returnValue(true));
         $form->expects($this->once())->method('getData')->will($this->returnValue($user));
 
@@ -115,7 +115,7 @@ class UserControllerTest extends \PHPUnit_Framework_TestCase
         $userManager->expects($this->once())->method('findUserBy')->will($this->returnValue($user));
 
         $form = $this->getMockBuilder('Symfony\Component\Form\Form')->disableOriginalConstructor()->getMock();
-        $form->expects($this->once())->method('submit');
+        $form->expects($this->once())->method('handleRequest');
         $form->expects($this->once())->method('isValid')->will($this->returnValue(false));
 
         $formFactory = $this->getMock('Symfony\Component\Form\FormFactoryInterface');
@@ -142,7 +142,7 @@ class UserControllerTest extends \PHPUnit_Framework_TestCase
 
         $view = $this->createUserController($user, $userManager, $groupManager)->postUserGroupAction(1, 1);
 
-        $this->assertEquals(array('added' => true), $view);
+        $this->assertEquals(['added' => true], $view);
     }
 
     public function testPostUserGroupInvalidAction()
@@ -165,7 +165,7 @@ class UserControllerTest extends \PHPUnit_Framework_TestCase
 
         $data = $view->getData();
 
-        $this->assertEquals(array('error' => 'User "1" already has group "1"'), $data);
+        $this->assertEquals(['error' => 'User "1" already has group "1"'], $data);
     }
 
     public function testDeleteUserGroupAction()
@@ -184,7 +184,7 @@ class UserControllerTest extends \PHPUnit_Framework_TestCase
 
         $view = $this->createUserController($user, $userManager, $groupManager)->deleteUserGroupAction(1, 1);
 
-        $this->assertEquals(array('removed' => true), $view);
+        $this->assertEquals(['removed' => true], $view);
     }
 
     public function testDeleteUserGroupInvalidAction()
@@ -207,7 +207,7 @@ class UserControllerTest extends \PHPUnit_Framework_TestCase
 
         $data = $view->getData();
 
-        $this->assertEquals(array('error' => 'User "1" has not group "1"'), $data);
+        $this->assertEquals(['error' => 'User "1" has not group "1"'], $data);
     }
 
     public function testDeleteUserAction()
@@ -220,7 +220,7 @@ class UserControllerTest extends \PHPUnit_Framework_TestCase
 
         $view = $this->createUserController($user, $userManager)->deleteUserAction(1);
 
-        $this->assertEquals(array('deleted' => true), $view);
+        $this->assertEquals(['deleted' => true], $view);
     }
 
     public function testDeleteUserInvalidAction()

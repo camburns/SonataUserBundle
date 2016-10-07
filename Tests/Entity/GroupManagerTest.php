@@ -19,6 +19,21 @@ use Sonata\UserBundle\Entity\GroupManager;
  */
 class GroupManagerTest extends \PHPUnit_Framework_TestCase
 {
+    /**
+     * @param $qbCallback
+     *
+     * @return GroupManager
+     */
+    protected function getUserManager($qbCallback)
+    {
+        $em = EntityManagerMockFactory::create($this, $qbCallback, [
+            'name',
+            'roles',
+        ]);
+
+        return new GroupManager($em, 'Sonata\UserBundle\Entity\BaseGroup');
+    }
+
     public function testGetPager()
     {
         $self = $this;
@@ -29,9 +44,9 @@ class GroupManagerTest extends \PHPUnit_Framework_TestCase
                     $self->equalTo('g.name'),
                     $self->equalTo('ASC')
                 );
-                $qb->expects($self->once())->method('setParameters')->with($self->equalTo(array()));
+                $qb->expects($self->once())->method('setParameters')->with($self->equalTo([]));
             })
-            ->getPager(array(), 1);
+            ->getPager([], 1);
     }
 
     /**
@@ -47,7 +62,7 @@ class GroupManagerTest extends \PHPUnit_Framework_TestCase
                 $qb->expects($self->never())->method('orderBy');
                 $qb->expects($self->never())->method('setParameters');
             })
-            ->getPager(array(), 1, 10, array('invalid' => 'ASC'));
+            ->getPager([], 1, 10, ['invalid' => 'ASC']);
     }
 
     public function testGetPagerWithEnabledUsers()
@@ -60,9 +75,9 @@ class GroupManagerTest extends \PHPUnit_Framework_TestCase
                     $self->equalTo('g.name'),
                     $self->equalTo('ASC')
                 );
-                $qb->expects($self->once())->method('setParameters')->with($self->equalTo(array('enabled' => true)));
+                $qb->expects($self->once())->method('setParameters')->with($self->equalTo(['enabled' => true]));
             })
-            ->getPager(array('enabled' => true), 1);
+            ->getPager(['enabled' => true], 1);
     }
 
     public function testGetPagerWithDisabledUsers()
@@ -75,23 +90,8 @@ class GroupManagerTest extends \PHPUnit_Framework_TestCase
                     $self->equalTo('g.name'),
                     $self->equalTo('ASC')
                 );
-                $qb->expects($self->once())->method('setParameters')->with($self->equalTo(array('enabled' => false)));
+                $qb->expects($self->once())->method('setParameters')->with($self->equalTo(['enabled' => false]));
             })
-            ->getPager(array('enabled' => false), 1);
-    }
-
-    /**
-     * @param $qbCallback
-     *
-     * @return GroupManager
-     */
-    protected function getUserManager($qbCallback)
-    {
-        $em = EntityManagerMockFactory::create($this, $qbCallback, array(
-            'name',
-            'roles',
-        ));
-
-        return new GroupManager($em, 'Sonata\UserBundle\Entity\BaseGroup');
+            ->getPager(['enabled' => false], 1);
     }
 }

@@ -29,10 +29,9 @@ class UserManagerTest extends \PHPUnit_Framework_TestCase
                     $self->equalTo('u.username'),
                     $self->equalTo('ASC')
                 );
-                $qb->expects($self->never())->method('setParameter');
-                $qb->expects($self->never())->method('setParameters');
+                $qb->expects($self->once())->method('setParameters')->with($self->equalTo([]));
             })
-            ->getPager(array(), 1);
+            ->getPager([], 1);
     }
 
     /**
@@ -48,7 +47,7 @@ class UserManagerTest extends \PHPUnit_Framework_TestCase
                 $qb->expects($self->never())->method('orderBy');
                 $qb->expects($self->never())->method('setParameters');
             })
-            ->getPager(array(), 1, 10, array('invalid' => 'ASC'));
+            ->getPager([], 1, 10, ['invalid' => 'ASC']);
     }
 
     public function testGetPagerWithValidSortDesc()
@@ -84,7 +83,7 @@ class UserManagerTest extends \PHPUnit_Framework_TestCase
                     $self->equalTo('ASC')
                 );
             })
-            ->getPager(array('enabled' => true), 1);
+            ->getPager(['enabled' => true], 1);
     }
 
     public function testGetPagerWithDisabledUsers()
@@ -102,7 +101,7 @@ class UserManagerTest extends \PHPUnit_Framework_TestCase
                     $self->equalTo('ASC')
                 );
             })
-            ->getPager(array('enabled' => false), 1);
+            ->getPager(['enabled' => false], 1);
     }
 
     public function testGetPagerWithLockedUsers()
@@ -120,7 +119,7 @@ class UserManagerTest extends \PHPUnit_Framework_TestCase
                     $self->equalTo('ASC')
                 );
             })
-            ->getPager(array('locked' => true), 1);
+            ->getPager(['locked' => true], 1);
     }
 
     public function testGetPagerWithNonLockedUsers()
@@ -138,7 +137,7 @@ class UserManagerTest extends \PHPUnit_Framework_TestCase
                     $self->equalTo(false)
                 );
             })
-            ->getPager(array('locked' => false), 1);
+            ->getPager(['locked' => false], 1);
     }
 
     public function testGetPagerWithDisabledAndNonLockedUsers()

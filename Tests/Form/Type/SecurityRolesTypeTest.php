@@ -31,7 +31,7 @@ class SecurityRolesTypeTest extends TypeTestCase
         $type = new SecurityRolesType($this->roleBuilder);
 
         $optionResolver = new OptionsResolver();
-        $type->setDefaultOptions($optionResolver);
+        $type->configureOptions($optionResolver);
 
         $options = $optionResolver->resolve();
         $this->assertCount(3, $options['choices']);
@@ -46,23 +46,19 @@ class SecurityRolesTypeTest extends TypeTestCase
     public function testGetParent()
     {
         $type = new SecurityRolesType($this->roleBuilder);
-        $this->assertEquals(
-            method_exists('Symfony\Component\Form\FormTypeInterface', 'setDefaultOptions') ?
-                'choice' :
-                'Symfony\Component\Form\Extension\Core\Type\ChoiceType',
-            $type->getParent()
+        $this->assertEquals('Symfony\Component\Form\Extension\Core\Type\ChoiceType', $type->getParent()
         );
     }
 
     public function testSubmitValidData()
     {
-        $form = $this->factory->create($this->getSecurityRolesTypeName(), null, array(
+        $form = $this->factory->create($this->getSecurityRolesTypeName(), null, [
             'multiple' => true,
             'expanded' => true,
             'required' => false,
-        ));
+        ]);
 
-        $form->submit(array(0 => 'ROLE_FOO'));
+        $form->submit([0 => 'ROLE_FOO']);
 
         $this->assertTrue($form->isSynchronized());
         $this->assertCount(1, $form->getData());
@@ -71,13 +67,13 @@ class SecurityRolesTypeTest extends TypeTestCase
 
     public function testSubmitInvalidData()
     {
-        $form = $this->factory->create($this->getSecurityRolesTypeName(), null, array(
+        $form = $this->factory->create($this->getSecurityRolesTypeName(), null, [
             'multiple' => true,
             'expanded' => true,
             'required' => false,
-        ));
+        ]);
 
-        $form->submit(array(0 => 'ROLE_NOT_EXISTS'));
+        $form->submit([0 => 'ROLE_NOT_EXISTS']);
 
         $this->assertFalse($form->isSynchronized());
         $this->assertNull($form->getData());
@@ -85,17 +81,18 @@ class SecurityRolesTypeTest extends TypeTestCase
 
     public function testSubmitWithHiddenRoleData()
     {
-        $originalRoles = array('ROLE_SUPER_ADMIN', 'ROLE_USER');
+        $originalRoles = ['ROLE_SUPER_ADMIN', 'ROLE_USER'];
 
-        $form = $this->factory->create($this->getSecurityRolesTypeName(), $originalRoles, array(
+        $form = $this->factory->create($this->getSecurityRolesTypeName(), $originalRoles, [
             'multiple' => true,
             'expanded' => true,
             'required' => false,
-        ));
+        ]);
 
         // we keep hidden ROLE_SUPER_ADMIN and delete available ROLE_USER
-        $form->submit(array(0 => 'ROLE_ADMIN'));
+        $form->submit([0 => 'ROLE_ADMIN']);
 
+        $this->assertNull($form->getTransformationFailure());
         $this->assertTrue($form->isSynchronized());
         $this->assertCount(2, $form->getData());
         $this->assertContains('ROLE_SUPER_ADMIN', $form->getData());
