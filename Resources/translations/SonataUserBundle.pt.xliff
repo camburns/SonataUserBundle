@@ -4,7 +4,7 @@
         <body>
             <trans-unit id="title_user_registration">
                 <source>title_user_registration</source>
-                <target>Registar</target>
+                <target>title_user_registration</target>
             </trans-unit>
             <trans-unit id="title_user_account">
                 <source>title_user_account</source>
@@ -72,7 +72,7 @@
             </trans-unit>
             <trans-unit id="user_block_profile">
                 <source>user_block_profile</source>
-                <target>Perfil</target>
+                <target>user_block_profile</target>
             </trans-unit>
             <trans-unit id="user_form.label_username">
                 <source>form.label_username</source>
@@ -92,7 +92,7 @@
             </trans-unit>
             <trans-unit id="form.label_roles">
                 <source>form.label_roles</source>
-                <target>Tipos de utilizador</target>
+                <target>Perfís</target>
             </trans-unit>
             <trans-unit id="form.label_locked">
                 <source>form.label_locked</source>

@@ -440,11 +440,11 @@
             </trans-unit>
             <trans-unit id="show.label_gplus_uid">
                 <source>show.label_gplus_uid</source>
-                <target>Kennung bei Google+</target>
+                <target>Google+ Benutzerkennnung</target>
             </trans-unit>
             <trans-unit id="show.label_gplus_name">
                 <source>show.label_gplus_name</source>
-                <target>Name bei Google+</target>
+                <target>Google+ Name</target>
             </trans-unit>
             <trans-unit id="show.label_token">
                 <source>show.label_token</source>
@@ -452,7 +452,7 @@
             </trans-unit>
             <trans-unit id="show.label_two_step_verification_code">
                 <source>show.label_two_step_verification_code</source>
-                <target>Zwei-Schritte-Bestätigung</target>
+                <target>Zwei-Schritte Bestätigung</target>
             </trans-unit>
             <trans-unit id="gender_unknown">
                 <source>gender_unknown</source>
@@ -513,6 +513,10 @@
             <trans-unit id="Gender">
                 <source>Gender</source>
                 <target>Geschlecht</target>
+            </trans-unit>
+            <trans-unit id="Bad credentials">
+                <source>Bad credentials</source>
+                <target>Benutzername oder Passwort ungültig</target>
             </trans-unit>
             <trans-unit id="sonata_profile_title">
                 <source>sonata_profile_title</source>
@@ -596,7 +600,7 @@
             </trans-unit>
             <trans-unit id="forgotten_password">
                 <source>forgotten_password</source>
-                <target>Passwort vergessen?</target>
+                <target>Passwort vergessen</target>
             </trans-unit>
             <trans-unit id="sonata_user_profile_breadcrumb_index">
                 <source>sonata_user_profile_breadcrumb_index</source>
