@@ -11,7 +11,7 @@
 
 namespace Sonata\UserBundle\Entity;
 
-use FOS\UserBundle\Entity\GroupManager as BaseGroupManager;
+use FOS\UserBundle\Doctrine\GroupManager as BaseGroupManager;
 use Sonata\DatagridBundle\Pager\Doctrine\Pager;
 use Sonata\DatagridBundle\ProxyQuery\Doctrine\ProxyQuery;
 use Sonata\UserBundle\Model\GroupManagerInterface;
@@ -35,7 +35,7 @@ class GroupManager extends BaseGroupManager implements GroupManagerInterface
     /**
      * {@inheritdoc}
      */
-    public function getPager(array $criteria, $page, $limit = 10, array $sort = array())
+    public function getPager(array $criteria, $page, $limit = 10, array $sort = [])
     {
         $query = $this->repository
             ->createQueryBuilder('g')
@@ -49,14 +49,14 @@ class GroupManager extends BaseGroupManager implements GroupManagerInterface
         }
 
         if (count($sort) == 0) {
-            $sort = array('name' => 'ASC');
+            $sort = ['name' => 'ASC'];
         }
 
         foreach ($sort as $field => $direction) {
             $query->orderBy(sprintf('g.%s', $field), strtoupper($direction));
         }
 
-        $parameters = array();
+        $parameters = [];
 
         if (isset($criteria['enabled'])) {
             $query->andWhere('g.enabled = :enabled');

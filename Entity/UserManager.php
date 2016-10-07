@@ -12,7 +12,6 @@
 namespace Sonata\UserBundle\Entity;
 
 use FOS\UserBundle\Doctrine\UserManager as BaseUserManager;
-use Sonata\CoreBundle\Model\ManagerInterface;
 use Sonata\DatagridBundle\Pager\Doctrine\Pager;
 use Sonata\DatagridBundle\ProxyQuery\Doctrine\ProxyQuery;
 use Sonata\UserBundle\Model\UserManagerInterface;
@@ -23,7 +22,7 @@ use Sonata\UserBundle\Model\UserManagerInterface;
  *
  * @author Hugo Briand <briand@ekino.com>
  */
-class UserManager extends BaseUserManager implements UserManagerInterface, ManagerInterface
+class UserManager extends BaseUserManager implements UserManagerInterface
 {
     /**
      * {@inheritdoc}
@@ -108,7 +107,7 @@ class UserManager extends BaseUserManager implements UserManagerInterface, Manag
     /**
      * {@inheritdoc}
      */
-    public function getPager(array $criteria, $page, $limit = 10, array $sort = array())
+    public function getPager(array $criteria, $page, $limit = 10, array $sort = [])
     {
         $query = $this->repository
             ->createQueryBuilder('u')
@@ -121,21 +120,25 @@ class UserManager extends BaseUserManager implements UserManagerInterface, Manag
             }
         }
         if (count($sort) == 0) {
-            $sort = array('username' => 'ASC');
+            $sort = ['username' => 'ASC'];
         }
         foreach ($sort as $field => $direction) {
             $query->orderBy(sprintf('u.%s', $field), strtoupper($direction));
         }
 
+        $parameters = [];
+
         if (isset($criteria['enabled'])) {
             $query->andWhere('u.enabled = :enabled');
-            $query->setParameter('enabled', $criteria['enabled']);
+            $parameters['enabled'] = $criteria['enabled'];
         }
 
         if (isset($criteria['locked'])) {
             $query->andWhere('u.locked = :locked');
-            $query->setParameter('locked', $criteria['locked']);
+            $parameters['locked'] = $criteria['locked'];
         }
+
+        $query->setParameters($parameters);
 
         $pager = new Pager();
         $pager->setMaxPerPage($limit);
