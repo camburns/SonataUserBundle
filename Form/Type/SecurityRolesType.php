@@ -99,17 +99,17 @@ class SecurityRolesType extends AbstractType
     {
         list($roles, $rolesReadOnly) = $this->rolesBuilder->getRoles();
 
-        $resolver->setDefaults(array(
+        $resolver->setDefaults([
             'choices' => function (Options $options, $parentChoices) use ($roles) {
-                return empty($parentChoices) ? $roles : array();
+                return empty($parentChoices) ? array_flip($roles) : [];
             },
 
             'read_only_choices' => function (Options $options) use ($rolesReadOnly) {
-                return empty($options['choices']) ? $rolesReadOnly : array();
+                return empty($options['choices']) ? $rolesReadOnly : [];
             },
 
             'data_class' => null,
-        ));
+        ]);
     }
 
     /**
@@ -117,10 +117,7 @@ class SecurityRolesType extends AbstractType
      */
     public function getParent()
     {
-        return
-            method_exists('Symfony\Component\Form\FormTypeInterface', 'setDefaultOptions') ?
-                'choice' : // support for symfony < 2.8.0
-                'Symfony\Component\Form\Extension\Core\Type\ChoiceType';
+        return 'Symfony\Component\Form\Extension\Core\Type\ChoiceType';
     }
 
     /**
