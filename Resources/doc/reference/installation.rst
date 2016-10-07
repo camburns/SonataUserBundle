@@ -7,7 +7,7 @@ Installation
 Prerequisites
 -------------
 
-PHP 5.3 and Symfony 2 are needed to make this bundle work; there are also some Sonata dependencies that need to be installed and configured beforehand:
+PHP 5.5.9 and Symfony 2 are needed to make this bundle work; there are also some Sonata dependencies that need to be installed and configured beforehand:
 
     - `SonataAdminBundle <https://sonata-project.org/bundles/admin>`_
     - `SonataEasyExtendsBundle <https://sonata-project.org/bundles/easy-extends>`_
@@ -29,6 +29,9 @@ Enable the Bundle
     php composer.phar require friendsofsymfony/rest-bundle  --no-update # optional when using api
     php composer.phar require nelmio/api-doc-bundle  --no-update # optional when using api
     php composer.phar update
+
+.. note::
+    This bundle supports only version ``2.x`` version of the ``FOS/UserBundle``.
 
 Next, be sure to enable the bundles in your and ``AppKernel.php`` file:
 
