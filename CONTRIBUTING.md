@@ -1,4 +1,11 @@
-# Sonata project contribution
+
+        "friendsofsymfony/user-bundle": "~2.0@dev",
+        "sonata-project/admin-bundle": "^3.1",
+        "sonata-project/core-bundle": "^3.0",
+        "sonata-project/datagrid-bundle": "^2.2",
+        "sonata-project/doctrine-extensions": "^1.0",
+        "sonata-project/easy-extends-bundle": "^2.1",
+        "sonata-project/google-authenticator": "^1.0",# Sonata project contribution
 
 Thanks for your interest in Sonata projects!
 
