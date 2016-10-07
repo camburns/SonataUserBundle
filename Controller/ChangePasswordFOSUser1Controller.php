@@ -11,11 +11,18 @@
 
 namespace Sonata\UserBundle\Controller;
 
+use FOS\UserBundle\Event\FilterUserResponseEvent;
+use FOS\UserBundle\Event\FormEvent;
+use FOS\UserBundle\Event\GetResponseUserEvent;
+use FOS\UserBundle\Form\Factory\FactoryInterface;
+use FOS\UserBundle\FOSUserEvents;
 use FOS\UserBundle\Model\UserInterface;
+use FOS\UserBundle\Model\UserManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\File\Exception\AccessDeniedException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Class ChangePasswordFOSUser1Controller.
@@ -32,45 +39,52 @@ class ChangePasswordFOSUser1Controller extends Controller
      *
      * @throws AccessDeniedException
      */
-    public function changePasswordAction()
+    public function changePasswordAction(Request $request)
     {
         $user = $this->getUser();
         if (!is_object($user) || !$user instanceof UserInterface) {
             $this->createAccessDeniedException('This user does not have access to this section.');
         }
 
-        $form = $this->get('fos_user.change_password.form');
-        $formHandler = $this->get('fos_user.change_password.form.handler');
+        /** @var $dispatcher EventDispatcherInterface */
+        $dispatcher = $this->get('event_dispatcher');
 
-        $process = $formHandler->process($user);
-        if ($process) {
-            $this->setFlash('fos_user_success', 'change_password.flash.success');
+        $event = new GetResponseUserEvent($user, $request);
+        $dispatcher->dispatch(FOSUserEvents::CHANGE_PASSWORD_INITIALIZE, $event);
 
-            return $this->redirect($this->getRedirectionUrl($user));
+        if (null !== $event->getResponse()) {
+            return $event->getResponse();
         }
 
-        return $this->render(
-            'SonataUserBundle:ChangePassword:changePassword.html.'.$this->container->getParameter('fos_user.template.engine'),
-            array('form' => $form->createView())
-        );
+        /** @var $formFactory FactoryInterface */
+        $formFactory = $this->get('fos_user.change_password.form.factory');
+
+        $form = $formFactory->createForm();
+        $form->setData($user);
+
+        $form->handleRequest($request);
+
+        if ($form->isValid()) {
+            /** @var $userManager UserManagerInterface */
+            $userManager = $this->get('fos_user.user_manager');
+
+            $event = new FormEvent($form, $request);
+            $dispatcher->dispatch(FOSUserEvents::CHANGE_PASSWORD_SUCCESS, $event);
+
+            $userManager->updateUser($user);
+
+            if (null === $response = $event->getResponse()) {
+                $url = $this->generateUrl('sonata_user_profile_show');
+                $response = new RedirectResponse($url);
     }
 
-    /**
-     * @param UserInterface $user
-     *
-     * @return string
-     */
-    protected function getRedirectionUrl(UserInterface $user)
-    {
-        return $this->generateUrl('sonata_user_profile_show');
+            $dispatcher->dispatch(FOSUserEvents::CHANGE_PASSWORD_COMPLETED, new FilterUserResponseEvent($user, $request, $response));
+
+            return $response;
     }
 
-    /**
-     * @param string $action
-     * @param string $value
-     */
-    protected function setFlash($action, $value)
-    {
-        $this->get('session')->getFlashBag()->set($action, $value);
+        return $this->render('SonataUserBundle:ChangePassword:changePassword.html.twig', [
+            'form' => $form->createView(),
+        ]);
     }
 }

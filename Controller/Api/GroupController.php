@@ -76,9 +76,9 @@ class GroupController
      */
     public function getGroupsAction(ParamFetcherInterface $paramFetcher)
     {
-        $supportedFilters = array(
+        $supportedFilters = [
             'enabled' => '',
-        );
+        ];
 
         $page = $paramFetcher->get('page');
         $limit = $paramFetcher->get('count');
@@ -92,9 +92,9 @@ class GroupController
         }
 
         if (!$sort) {
-            $sort = array();
+            $sort = [];
         } elseif (!is_array($sort)) {
-            $sort = array($sort, 'asc');
+            $sort = [$sort, 'asc'];
         }
 
         return $this->groupManager->getPager($criteria, $page, $limit, $sort);
@@ -139,9 +139,9 @@ class GroupController
      *
      * @param Request $request A Symfony request
      *
-     * @return GroupInterface
-     *
      * @throws NotFoundHttpException
+     *
+     * @return GroupInterface
      */
     public function postGroupAction(Request $request)
     {
@@ -167,13 +167,48 @@ class GroupController
      * @param int     $id      Group identifier
      * @param Request $request A Symfony request
      *
-     * @return GroupInterface
-     *
      * @throws NotFoundHttpException
+     *
+     * @return GroupInterface
      */
     public function putGroupAction($id, Request $request)
     {
         return $this->handleWriteGroup($request, $id);
+    }
+
+    /**
+     * Write a Group, this method is used by both POST and PUT action methods.
+     *
+     * @param Request  $request Symfony request
+     * @param int|null $id      A Group identifier
+     *
+     * @return FormInterface
+     */
+    protected function handleWriteGroup($request, $id = null)
+    {
+        $groupClassName = $this->groupManager->getClass();
+        $group = $id ? $this->getGroup($id) : new $groupClassName('');
+
+        $form = $this->formFactory->createNamed(null, 'sonata_user_api_form_group', $group, [
+            'csrf_protection' => false,
+        ]);
+
+        $form->handleRequest($request);
+
+        if ($form->isValid()) {
+            $group = $form->getData();
+            $this->groupManager->updateGroup($group);
+
+            $view = FOSRestView::create($group);
+            $serializationContext = SerializationContext::create();
+            $serializationContext->setGroups(['sonata_api_read']);
+            $serializationContext->enableMaxDepthChecks();
+            $view->setSerializationContext($serializationContext);
+
+            return $view;
+        }
+
+        return $form;
     }
 
     /**
@@ -192,9 +227,9 @@ class GroupController
      *
      * @param int $id A Group identifier
      *
-     * @return \FOS\RestBundle\View\View
-     *
      * @throws NotFoundHttpException
+     *
+     * @return \FOS\RestBundle\View\View
      */
     public function deleteGroupAction($id)
     {
@@ -202,42 +237,7 @@ class GroupController
 
         $this->groupManager->deleteGroup($group);
 
-        return array('deleted' => true);
-    }
-
-    /**
-     * Write a Group, this method is used by both POST and PUT action methods.
-     *
-     * @param Request  $request Symfony request
-     * @param int|null $id      A Group identifier
-     *
-     * @return FormInterface
-     */
-    protected function handleWriteGroup($request, $id = null)
-    {
-        $groupClassName = $this->groupManager->getClass();
-        $group = $id ? $this->getGroup($id) : new $groupClassName('');
-
-        $form = $this->formFactory->createNamed(null, 'sonata_user_api_form_group', $group, array(
-            'csrf_protection' => false,
-        ));
-
-        $form->submit($request);
-
-        if ($form->isValid()) {
-            $group = $form->getData();
-            $this->groupManager->updateGroup($group);
-
-            $view = FOSRestView::create($group);
-            $serializationContext = SerializationContext::create();
-            $serializationContext->setGroups(array('sonata_api_read'));
-            $serializationContext->enableMaxDepthChecks();
-            $view->setSerializationContext($serializationContext);
-
-            return $view;
-        }
-
-        return $form;
+        return ['deleted' => true];
     }
 
     /**
@@ -245,13 +245,13 @@ class GroupController
      *
      * @param $id
      *
-     * @return GroupInterface
-     *
      * @throws NotFoundHttpException
+     *
+     * @return GroupInterface
      */
     protected function getGroup($id)
     {
-        $group = $this->groupManager->findGroupBy(array('id' => $id));
+        $group = $this->groupManager->findGroupBy(['id' => $id]);
 
         if (null === $group) {
             throw new NotFoundHttpException(sprintf('Group (%d) not found', $id));

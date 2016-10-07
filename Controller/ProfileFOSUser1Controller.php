@@ -11,9 +11,14 @@
 
 namespace Sonata\UserBundle\Controller;
 
+use FOS\UserBundle\Event\FilterUserResponseEvent;
+use FOS\UserBundle\Event\FormEvent;
+use FOS\UserBundle\Event\GetResponseUserEvent;
+use FOS\UserBundle\FOSUserEvents;
 use FOS\UserBundle\Model\UserInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
@@ -28,6 +33,8 @@ class ProfileFOSUser1Controller extends Controller
      * @return Response
      *
      * @throws AccessDeniedException
+     *
+     * @return Response
      */
     public function showAction()
     {
@@ -36,65 +43,110 @@ class ProfileFOSUser1Controller extends Controller
             throw $this->createAccessDeniedException('This user does not have access to this section.');
         }
 
-        return $this->render('SonataUserBundle:Profile:show.html.twig', array(
+        return $this->render('SonataUserBundle:Profile:show.html.twig', [
             'user' => $user,
             'blocks' => $this->container->getParameter('sonata.user.configuration.profile_blocks'),
-        ));
+        ]);
     }
 
     /**
-     * @return Response|RedirectResponse
+     * @param Request $request
      *
-     * @throws AccessDeniedException
+     * @return null|RedirectResponse|Response
      */
-    public function editAuthenticationAction()
+    public function editAuthenticationAction(Request $request)
     {
         $user = $this->getUser();
         if (!is_object($user) || !$user instanceof UserInterface) {
             throw $this->createAccessDeniedException('This user does not have access to this section.');
         }
 
-        $form = $this->get('sonata.user.authentication.form');
-        $formHandler = $this->get('sonata.user.authentication.form_handler');
+        /** @var $dispatcher \Symfony\Component\EventDispatcher\EventDispatcherInterface */
+        $dispatcher = $this->get('event_dispatcher');
+        $event = new GetResponseUserEvent($user, $request);
 
-        $process = $formHandler->process($user);
-        if ($process) {
-            $this->setFlash('sonata_user_success', 'profile.flash.updated');
-
-            return $this->redirect($this->generateUrl('sonata_user_profile_show'));
+        if (null !== $event->getResponse()) {
+            return $event->getResponse();
         }
 
-        return $this->render('SonataUserBundle:Profile:edit_authentication.html.twig', array(
+        /** @var $formFactory \FOS\UserBundle\Form\Factory\FactoryInterface */
+        $formFactory = $this->get('fos_user.profile.form.factory');
+        $form = $formFactory->createForm();
+        $form->setData($user);
+        $form->handleRequest($request);
+
+        if ($form->isValid()) {
+            /** @var $userManager \FOS\UserBundle\Model\UserManagerInterface */
+            $userManager = $this->get('fos_user.user_manager');
+            $userManager->updateUser($user);
+            $this->setFlash('sonata_user_success', 'profile.flash.updated');
+            $response = new RedirectResponse($this->generateUrl('sonata_user_profile_show'));
+
+            return $response;
+        }
+
+        return $this->render('SonataUserBundle:Profile:edit_authentication.html.twig', [
             'form' => $form->createView(),
-        ));
+                'breadcrumb_context' => 'user_profile',
+        ]);
     }
 
     /**
-     * @return Response|RedirectResponse
+     * @param Request $request
      *
      * @throws AccessDeniedException
+     *
+     * @return Response
      */
-    public function editProfileAction()
+    public function editProfileAction(Request $request)
     {
         $user = $this->getUser();
         if (!is_object($user) || !$user instanceof UserInterface) {
             throw $this->createAccessDeniedException('This user does not have access to this section.');
         }
 
-        $form = $this->get('sonata.user.profile.form');
-        $formHandler = $this->get('sonata.user.profile.form.handler');
+        /** @var $dispatcher \Symfony\Component\EventDispatcher\EventDispatcherInterface */
+        $dispatcher = $this->get('event_dispatcher');
 
-        $process = $formHandler->process($user);
-        if ($process) {
-            $this->setFlash('sonata_user_success', 'profile.flash.updated');
+        $event = new GetResponseUserEvent($user, $request);
+        $dispatcher->dispatch(FOSUserEvents::PROFILE_EDIT_INITIALIZE, $event);
 
-            return $this->redirect($this->generateUrl('sonata_user_profile_show'));
+        if (null !== $event->getResponse()) {
+            return $event->getResponse();
         }
 
-        return $this->render('SonataUserBundle:Profile:edit_profile.html.twig', array(
+        /** @var $formFactory \FOS\UserBundle\Form\Factory\FactoryInterface */
+        $formFactory = $this->get('fos_user.profile.form.factory');
+
+        $form = $formFactory->createForm();
+        $form->setData($user);
+
+        $form->handleRequest($request);
+
+        if ($form->isValid()) {
+            /** @var $userManager \FOS\UserBundle\Model\UserManagerInterface */
+            $userManager = $this->get('fos_user.user_manager');
+
+            $event = new FormEvent($form, $request);
+            $dispatcher->dispatch(FOSUserEvents::PROFILE_EDIT_SUCCESS, $event);
+
+            $userManager->updateUser($user);
+            $this->setFlash('sonata_user_success', 'profile.flash.updated');
+
+            if (null === $response = $event->getResponse()) {
+                $url = $this->generateUrl('sonata_user_profile_show');
+                $response = new RedirectResponse($url);
+        }
+
+            $dispatcher->dispatch(FOSUserEvents::PROFILE_EDIT_COMPLETED, new FilterUserResponseEvent($user, $request, $response));
+
+            return $response;
+        }
+
+        return $this->render('SonataUserBundle:Profile:edit_profile.html.twig', [
             'form' => $form->createView(),
             'breadcrumb_context' => 'user_profile',
-        ));
+        ]);
     }
 
     /**
